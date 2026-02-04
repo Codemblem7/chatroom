@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        #chatBox {
+            border: 1px solid #ccc;
+            height: 400px;
+            overflow-y: auto;
+            background: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 8px;
+            background: #e3f2fd;
+            border-radius: 5px;
+        }
+        .message.own {
+            background: #c8e6c9;
+            text-align: right;
+        }
+        #inputContainer {
+            display: flex;
+            gap: 10px;
+        }
+        #messageInput {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat Room</h1>
+    <div id="chatBox"></div>
+    <div id="inputContainer">
+        <input type="text" id="messageInput" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chatBox');
+        const messageInput = document.getElementById('messageInput');
+        const userId = Math.random().toString(36).substr(2, 9);
+        const dbUrl = 'https://www.googleapis.com/drive/v3/files';
+
+        let messages = [];
+
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            const message = {
+                id: Date.now(),
+                userId: userId,
+                text: text,
+                timestamp: new Date().toLocaleTimeString()
+            };
+
+            messages.push(message);
+            messageInput.value = '';
+            displayMessages();
+        }
+
+        function displayMessages() {
+            chatBox.innerHTML = messages.map(msg => 
+                `<div class="message ${msg.userId === userId ? 'own' : ''}">
+                    <strong>${msg.userId === userId ? 'You' : 'User'}:</strong> ${escapeHtml(msg.text)}
+                    <small>${msg.timestamp}</small>
+                </div>`
+            ).join('');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
